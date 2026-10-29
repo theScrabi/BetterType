@@ -11,7 +11,7 @@ android {
 
     defaultConfig {
         applicationId = "org.schabi.bettertype"
-        minSdk = 24
+        minSdk = 31
         targetSdk = 37
         versionCode = 1
         versionName = "1.0"
@@ -28,15 +28,37 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     buildFeatures {
         compose = true
     }
+    packaging {
+        resources {
+            // Every LT language module ships this file; languages are registered in code instead.
+            excludes += "META-INF/org/languagetool/language-module.properties"
+        }
+    }
+}
+
+// JAXB implementations come in transitively (segment, LT core) but LanguageTool never uses them,
+// and their overlapping copies of com.sun.istack/com.sun.xml.bind classes break dexing.
+configurations.configureEach {
+    exclude(group = "com.sun.xml.bind")
+    exclude(group = "org.glassfish.jaxb")
+    exclude(group = "com.sun.istack")
+    exclude(group = "com.intellij", module = "annotations") // old duplicate of org.jetbrains:annotations
+    // Desktop JNA Hunspell binding; Android uses lt:hunspell-android instead.
+    exclude(group = "net.java.dev.jna")
+    exclude(group = "com.gitlab.dumonts", module = "hunspell")
 }
 
 dependencies {
+    implementation(project(":lt:lang-en"))
+    implementation(project(":lt:lang-de"))
+    implementation(project(":lt:lang-fr"))
+    implementation(project(":lt:lang-es"))
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material3)
