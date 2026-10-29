@@ -12,6 +12,13 @@ import java.util.Locale
 
 /** Android's system spell checker backed by LanguageTool: word spelling plus sentence-level grammar. */
 class BetterTypeSpellCheckerService : SpellCheckerService() {
+
+    override fun onCreate() {
+        super.onCreate()
+        val locales = resources.configuration.locales
+        for (i in 0 until locales.size()) LtLanguages.warmUp(locales[i])
+    }
+
     override fun createSession(): Session = BetterTypeSession()
 }
 

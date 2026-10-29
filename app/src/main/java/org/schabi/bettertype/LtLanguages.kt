@@ -1,5 +1,6 @@
 package org.schabi.bettertype
 
+import android.util.Log
 import org.languagetool.JLanguageTool
 import org.languagetool.Language
 import org.languagetool.Languages
@@ -7,6 +8,7 @@ import org.languagetool.ResultCache
 import org.languagetool.rules.spelling.hunspell.AndroidHunspellDictionary
 import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.Executors
 
 /**
  * LanguageTool normally finds languages via META-INF/org/languagetool/language-module.properties,
@@ -50,6 +52,26 @@ object LtLanguages {
         all
         return checkers.computeIfAbsent(Languages.getLanguageForLocale(locale)) {
             JLanguageTool(it, null, ResultCache(1000))
+        }
+    }
+
+    private val warmUpExecutor = Executors.newSingleThreadExecutor { task ->
+        Thread(task, "lt-warm-up").apply { isDaemon = true; priority = Thread.MIN_PRIORITY }
+    }
+
+    /**
+     * Loads the language in the background and runs one check: LanguageTool initializes much of its data
+     * lazily on the first check (German: ~30 s on an emulator), which would otherwise delay the first result.
+     */
+    fun warmUp(locale: Locale) {
+        warmUpExecutor.execute {
+            try {
+                val lt = checkerFor(locale)
+                // The made-up word also initializes suggestion generation, which only happens for the first typo.
+                synchronized(lt) { lt.check("Warm-up qxzv.") }
+            } catch (e: Exception) {
+                Log.e("BetterType", "Warm-up for $locale failed", e)
+            }
         }
     }
 }
