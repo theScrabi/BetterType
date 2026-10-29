@@ -56,6 +56,10 @@ configurations.configureEach {
     exclude(group = "com.gitlab.dumonts", module = "hunspell")
     // Network transport for LT's remote ML servers (never used on device), incl. desktop natives: ~13 MB.
     exclude(group = "io.grpc", module = "grpc-netty-shaded")
+    // Lucene backs only LT's n-gram language model (needs GBs of data, not shipped);
+    // Google's common protos are only used by gRPC status handling for the remote servers.
+    exclude(group = "org.apache.lucene")
+    exclude(group = "com.google.api.grpc", module = "proto-google-common-protos")
 }
 
 // Guava's Gradle metadata hands Android builds the -android flavor, whose Supplier etc. don't extend the
