@@ -2,6 +2,7 @@ package org.schabi.bettertype
 
 import org.languagetool.Language
 import org.languagetool.Languages
+import org.languagetool.rules.spelling.hunspell.AndroidHunspellDictionary
 
 /**
  * LanguageTool normally finds languages via META-INF/org/languagetool/language-module.properties,
@@ -31,6 +32,7 @@ object LtLanguages {
     val all: List<Language> by lazy {
         // OpenNLP (English chunker) uses XMLReaderFactory, which on Android needs the SAX driver named explicitly.
         System.setProperty("org.xml.sax.driver", "org.apache.harmony.xml.ExpatReader")
+        AndroidHunspellDictionary.install()
         CLASSES.map(Languages::getOrAddLanguageByClassName)
     }
 }

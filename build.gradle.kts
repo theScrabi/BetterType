@@ -1,6 +1,7 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 plugins {
     alias(libs.plugins.android.application) apply false
+    alias(libs.plugins.android.library) apply false
     alias(libs.plugins.kotlin.compose) apply false
 }
 
@@ -18,6 +19,8 @@ subprojects {
             maxHeapSize = "3372m"
             include("**/Test*.class", "**/*Test.class", "**/*Tests.class", "**/*TestCase.class")
             exclude("**/*ConcurrencyTest.class", "**/Abstract*.class")
+            // JNA (desktop Hunspell) extracts its native helper; keep that inside the build dir.
+            systemProperty("jna.tmpdir", temporaryDir.absolutePath)
         }
     }
 }

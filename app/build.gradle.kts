@@ -71,6 +71,7 @@ dependencies {
     implementation(project(":lt:lang-de"))
     implementation(project(":lt:lang-fr"))
     implementation(project(":lt:lang-es"))
+    implementation(project(":lt:hunspell-android"))
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material3)

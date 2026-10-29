@@ -167,7 +167,8 @@ public final class Hunspell {
       }
 
       var tempFiles = createTempFilesFromStreams(language, dictionaryStream, affixStream);
-      var dict = new DumontsHunspellDictionary(tempFiles.dictionary, tempFiles.affix, false);
+      // Go through the factory (default: DumontsHunspellDictionary) so other platforms, e.g. Android, can plug in.
+      var dict = hunspellDictionaryStreamFactory.createFromLocalFiles(language, tempFiles.dictionary, tempFiles.affix);
 
       // Cache by resource path for future lookups (fixes #11380)
       resourceCache.put(key, dict);
