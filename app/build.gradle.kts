@@ -9,6 +9,8 @@ android {
         version = release(37)
     }
 
+    ndkVersion = "30.0.16248370" // lets AGP strip debug info from lt:hunspell-android's native library
+
     defaultConfig {
         applicationId = "org.schabi.bettertype"
         minSdk = 31
@@ -52,6 +54,8 @@ configurations.configureEach {
     // Desktop JNA Hunspell binding; Android uses lt:hunspell-android instead.
     exclude(group = "net.java.dev.jna")
     exclude(group = "com.gitlab.dumonts", module = "hunspell")
+    // Network transport for LT's remote ML servers (never used on device), incl. desktop natives: ~13 MB.
+    exclude(group = "io.grpc", module = "grpc-netty-shaded")
 }
 
 // Guava's Gradle metadata hands Android builds the -android flavor, whose Supplier etc. don't extend the

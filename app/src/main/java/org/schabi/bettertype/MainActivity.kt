@@ -19,6 +19,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import org.schabi.bettertype.ui.theme.BetterTypeTheme
@@ -47,8 +48,16 @@ class MainActivity : ComponentActivity() {
                             Text("Open keyboard settings")
                         }
                         // A framework EditText, because the system spell checker reliably attaches to it.
+                        val textColor = MaterialTheme.colorScheme.onSurface.toArgb()
+                        val hintColor = MaterialTheme.colorScheme.onSurfaceVariant.toArgb()
                         AndroidView(
-                            factory = { EditText(it).apply { hint = "Type here to try it, e.g. \"This are a test.\"" } },
+                            factory = {
+                                EditText(it).apply {
+                                    hint = "Type here to try it, e.g. \"This are a test.\""
+                                    setTextColor(textColor)
+                                    setHintTextColor(hintColor)
+                                }
+                            },
                             modifier = Modifier.fillMaxWidth(),
                         )
                         Text("Licenses", style = MaterialTheme.typography.titleMedium)
