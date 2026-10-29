@@ -60,7 +60,7 @@ dependencies {
     api("org.apache.lucene:lucene-core")
     api("org.carrot2:morfologik-fsa")
     api("org.carrot2:morfologik-fsa-builders")
-    api("org.carrot2:morfologik-speller")
+    api(project(":lt:morfologik-speller"))
     api("org.carrot2:morfologik-stemming")
     api("org.glassfish.jaxb:jaxb-runtime")
     api("it.unimi.dsi:fastutil-core")
