@@ -24,4 +24,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "BetterType"
 include(":app")
+include(":lt:core", ":lt:lang-en", ":lt:lang-de", ":lt:lang-fr", ":lt:lang-es")
  
