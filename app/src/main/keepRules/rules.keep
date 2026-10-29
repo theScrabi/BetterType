@@ -12,3 +12,7 @@
 #}
 # grpc-netty-shaded is excluded (only LanguageTool's remote ML rules use it, never on device).
 -dontwarn io.grpc.netty.shaded.**
+
+# R8 with optimization.packageScope moved Kotlin multi-file facade parts (e.g. CollectionsKt__IteratorsKt)
+# into another package while their package-private superclass stayed, crashing on start with IllegalAccessError.
+-keepnames class kotlin.**
