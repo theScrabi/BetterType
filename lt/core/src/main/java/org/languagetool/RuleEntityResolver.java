@@ -4,8 +4,15 @@ import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import com.google.common.io.ByteStreams;
+import org.languagetool.tools.StringTools;
+
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Resolves an XML file's external entity URIs as relative paths.
@@ -37,5 +44,29 @@ public class RuleEntityResolver implements EntityResolver {
   public InputStream getInputStreamLTEntities(String input) {
     return JLanguageTool.getDataBroker()
       .getFromResourceDirAsStream(getPathFromLTResourceFolder(input));
+  }
+
+  private static final Pattern ENTITY_FILE_DECL = Pattern.compile("<!ENTITY\\s+%\\s+(\\w+)\\s+SYSTEM\\s+\"([^\"]+\\.ent)\"\\s*>");
+
+  /**
+   * Android's expat parser cannot load external parameter entities and silently expands them to nothing,
+   * so there the {@code .ent} files a rule file references are inlined into its DOCTYPE before parsing.
+   */
+  public static InputStream inlineEntityFilesOnAndroid(InputStream in) throws IOException {
+    if (!StringTools.IS_ANDROID) {
+      return in;
+    }
+    String xml = new String(ByteStreams.toByteArray(in), StandardCharsets.UTF_8);
+    Matcher m = ENTITY_FILE_DECL.matcher(xml);
+    while (m.find()) {
+      String entities;
+      try (InputStream ent = new RuleEntityResolver().getInputStreamLTEntities(m.group(2))) {
+        entities = new String(ByteStreams.toByteArray(ent), StandardCharsets.UTF_8);
+      }
+      String rest = xml.substring(m.end()).replace("%" + m.group(1) + ";", entities);
+      xml = xml.substring(0, m.start()) + rest;
+      m = ENTITY_FILE_DECL.matcher(xml);
+    }
+    return new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8));
   }
 }

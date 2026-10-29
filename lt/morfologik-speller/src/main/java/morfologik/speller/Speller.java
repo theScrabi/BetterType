@@ -516,7 +516,9 @@ public class Speller {
       // a potential that this buffer can become a replacement candidate (isEndOfCandidate). Because we assume candidates
       // are valid input strings (this is verified when building the dictionary), it's save a lot of conversions.
       final CoderResult c = decoder.decode(byteBuffer, charBuffer, true);
-      if (c.isMalformed()) { // assume that only valid
+      // Android's (ICU) decoder buffers an incomplete multi-byte sequence and reports underflow with no
+      // output instead of reporting it as malformed like the JDK does; treat both the same.
+      if (c.isMalformed() || (!c.isError() && charBuffer.position() == 0)) { // assume that only valid
         // encodings are there
         final byte[] prev = new byte[bufPos];
         byteBuffer.position(0);

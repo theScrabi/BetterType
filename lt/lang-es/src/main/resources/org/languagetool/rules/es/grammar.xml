@@ -1756,7 +1756,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA
         <rule id="MANDELA" name="Mandela -> Mándela">
             <pattern>
                 <token postag="SENT_START"/>
-                <token min="0" max="3" regexp="yes">\{P}</token>
+                <token min="0" max="3" regexp="yes">\{P\}</token>
                 <marker>
                     <token>Mandela</token>
                 </marker>

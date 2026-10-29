@@ -24,9 +24,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.languagetool.tools.InterruptibleCharSequence;
 import org.languagetool.tools.StringInterner;
+import org.languagetool.tools.StringTools;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -72,13 +74,33 @@ public abstract class StringMatcher {
     return create(pattern, true, true);
   }
 
+  private static final Pattern BACKREFERENCE = Pattern.compile("(?<!\\\\)\\\\([1-9])");
+
+  /**
+   * A {@code <match>} inside a token becomes a placeholder like {@code \1} that is replaced before matching.
+   * The JDK compiles a reference to a missing group as "never matches"; Android's ICU engine rejects it,
+   * so there such references are spelled out as {@code (?!)}.
+   */
+  private static String missingGroupsNeverMatch(String regex) {
+    if (!StringTools.IS_ANDROID || !BACKREFERENCE.matcher(regex).find()) {
+      return regex;
+    }
+    int groups = Pattern.compile(BACKREFERENCE.matcher(regex).replaceAll("")).matcher("").groupCount();
+    Matcher m = BACKREFERENCE.matcher(regex);
+    StringBuffer sb = new StringBuffer();
+    while (m.find()) {
+      m.appendReplacement(sb, Integer.parseInt(m.group(1)) > groups ? "(?!)" : Matcher.quoteReplacement(m.group()));
+    }
+    return m.appendTail(sb).toString();
+  }
+
   public static StringMatcher create(String pattern, boolean isRegExp, boolean caseSensitive) {
     if (!isRegExp || "\\0".equals(pattern)) {
       return stringEquals(pattern, isRegExp, caseSensitive);
     }
 
     // always compile the pattern to check it's well-formed
-    Pattern compiled = Pattern.compile(pattern, caseSensitive ? 0 : Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
+    Pattern compiled = Pattern.compile(missingGroupsNeverMatch(pattern), caseSensitive ? 0 : Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
 
     Set<String> possibleRegexpValues = getPossibleRegexpValues(pattern);
     if (possibleRegexpValues != null) {

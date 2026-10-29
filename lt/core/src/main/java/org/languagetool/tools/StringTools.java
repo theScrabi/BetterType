@@ -88,7 +88,9 @@ public final class StringTools {
   private static final Pattern PUNCT_AND_SYMBOL_PATTERN = compile("[\\p{IsPunctuation}\\p{S}']");
   private static final Pattern NOT_WORD_CHARACTER = compile("[^\\p{L}]", DOTALL);
   private static final Pattern NOT_WORD_STR = compile("[^\\p{L}]+", DOTALL);
-  private static final Pattern PATTERN = compile("(?U)[^\\p{Space}\\p{Alnum}\\p{Punct}]");
+  /** True when running on Android (ART), whose java.util.regex is backed by ICU. */
+  public static final boolean IS_ANDROID = "Dalvik".equals(System.getProperty("java.vm.name"));
+  private static final Pattern PATTERN = compile(withoutUnicodeFlagOnAndroid("(?U)[^\\p{Space}\\p{Alnum}\\p{Punct}]"));
   private static final Pattern DIACRIT_MARKS = compile("[\\p{InCombiningDiacriticalMarks}]");
   // Sets of words used for titlecasing in a few locales; useful for named entities in foreign languages, esp. English
   private static final Set<String> ENGLISH_TITLECASE_EXCEPTIONS = Collections.unmodifiableSet(
@@ -1004,4 +1006,13 @@ public final class StringTools {
   public static String trimLeadingAndTrailingSpaces(String s) {
     return TRIM_PATTERN.matcher(s).replaceAll("");
   }
+
+  /**
+   * Android's ICU regex engine rejects the {@code (?U)} flag (UNICODE_CHARACTER_CLASS), but its character
+   * classes are Unicode-aware anyway, so dropping the flag there keeps the JVM semantics.
+   */
+  public static String withoutUnicodeFlagOnAndroid(String regex) {
+    return IS_ANDROID ? regex.replace("(?U)", "") : regex;
+  }
+
 }

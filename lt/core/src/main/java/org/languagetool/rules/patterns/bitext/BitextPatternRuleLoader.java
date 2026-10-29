@@ -18,6 +18,7 @@
  */
 package org.languagetool.rules.patterns.bitext;
 
+import org.languagetool.tools.StringTools;
 import org.languagetool.rules.patterns.PatternRule;
 import org.xml.sax.helpers.DefaultHandler;
 
@@ -40,7 +41,9 @@ public class BitextPatternRuleLoader extends DefaultHandler {
       BitextPatternRuleHandler handler = new BitextPatternRuleHandler();
       SAXParserFactory factory = SAXParserFactory.newInstance();
       SAXParser saxParser = factory.newSAXParser();
-      saxParser.getXMLReader().setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+      if (!StringTools.IS_ANDROID) {  // Android's expat parser rejects these Xerces/JDK settings
+        saxParser.getXMLReader().setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+      }
       saxParser.parse(is, handler);
       rules = handler.getBitextRules();
       return rules;

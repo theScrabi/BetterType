@@ -26,6 +26,7 @@ import org.languagetool.RuleEntityResolver;
 import org.languagetool.rules.*;
 import org.languagetool.tagging.disambiguation.rules.DisambiguationPatternRule;
 import org.languagetool.tools.StringInterner;
+import org.languagetool.tools.StringTools;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -789,7 +790,7 @@ public class PatternRuleHandler extends XMLRuleHandler {
         if (ruleAntiPatterns.size() > 0 || rulegroupAntiPatterns.size() > 0) {
           throw new RuntimeException("<regexp> rules currently cannot be used together with <antipattern>. Rule id: " + id + "[" + subId + "]");
         }
-        rule = new RegexPatternRule(id, name, message.toString(), shortMessage, suggestionsOutMsg.toString(), language, Pattern.compile(regexStr, flags), regexpMark);
+        rule = new RegexPatternRule(id, name, message.toString(), shortMessage, suggestionsOutMsg.toString(), language, Pattern.compile(StringTools.withoutUnicodeFlagOnAndroid(regexStr), flags), regexpMark);
         rule.setSourceFile(sourceFile);
       } else {
         throw new IllegalStateException("Neither '<pattern>' tokens nor '<regexp>' is set in rule '" + id + "'");

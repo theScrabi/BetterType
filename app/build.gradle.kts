@@ -54,6 +54,18 @@ configurations.configureEach {
     exclude(group = "com.gitlab.dumonts", module = "hunspell")
 }
 
+// Guava's Gradle metadata hands Android builds the -android flavor, whose Supplier etc. don't extend the
+// java.util.function types LanguageTool is compiled against (-jre), so pin the JRE variant.
+configurations.configureEach {
+    resolutionStrategy.dependencySubstitution {
+        substitute(module("com.google.guava:guava")).using(variant(module("com.google.guava:guava:33.5.0-jre")) { // version as pinned by languagetool-parent 6.8
+            attributes {
+                attribute(TargetJvmEnvironment.TARGET_JVM_ENVIRONMENT_ATTRIBUTE, objects.named(TargetJvmEnvironment.STANDARD_JVM))
+            }
+        })
+    }
+}
+
 dependencies {
     implementation(project(":lt:lang-en"))
     implementation(project(":lt:lang-de"))

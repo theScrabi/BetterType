@@ -18,6 +18,8 @@
  */
 package org.languagetool.rules.patterns;
 
+import org.languagetool.RuleEntityResolver;
+import org.languagetool.tools.StringTools;
 import org.languagetool.JLanguageTool;
 import org.languagetool.Language;
 import org.languagetool.tools.Tools;
@@ -72,11 +74,13 @@ public class PatternRuleLoader extends DefaultHandler {
       if (JLanguageTool.isCustomPasswordAuthenticatorUsed()) {
         Tools.setPasswordAuthenticator();
       }
-      saxParser.getXMLReader().setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
-      saxParser.getXMLReader().setProperty("jdk.xml.maxGeneralEntitySizeLimit", 0);
-      saxParser.getXMLReader().setProperty("jdk.xml.totalEntitySizeLimit", 0);
-      saxParser.getXMLReader().setProperty("jdk.xml.entityExpansionLimit", 0);
-      saxParser.parse(is, handler);
+      if (!StringTools.IS_ANDROID) {  // Android's expat parser rejects these Xerces/JDK settings
+        saxParser.getXMLReader().setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+        saxParser.getXMLReader().setProperty("jdk.xml.maxGeneralEntitySizeLimit", 0);
+        saxParser.getXMLReader().setProperty("jdk.xml.totalEntitySizeLimit", 0);
+        saxParser.getXMLReader().setProperty("jdk.xml.entityExpansionLimit", 0);
+      }
+      saxParser.parse(RuleEntityResolver.inlineEntityFilesOnAndroid(is), handler);
       return handler.getRules();
     } catch (Exception e) {
       throw new IOException("Cannot load or parse input stream of '" + filename + "'", e);

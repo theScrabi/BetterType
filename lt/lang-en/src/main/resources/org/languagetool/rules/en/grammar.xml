@@ -1168,7 +1168,7 @@ USA
                 </pattern>
                 <message>The abbreviation for "identification" is spelled all-uppercase, or did you mean "I'd" (= I would/had)?</message>
                 <suggestion>I'd</suggestion>
-                <suggestion><match no="1" regexp_match="(?)id" regexp_replace="ID" /></suggestion>
+                <suggestion><match no="1" regexp_match="id" regexp_replace="ID" /></suggestion>
                 <example correction="I'd|ID">I think <marker>id</marker> preferred your solution.</example>
                 <example correction="I'd|ID">Well, <marker>id</marker> probably just go home.</example>
             </rule>
@@ -1181,7 +1181,7 @@ USA
                     <token case_sensitive="yes" regexp="yes">ids?</token>
                 </pattern>
                 <message>This abbreviation for "identification" is spelled all-uppercase.</message>
-                <suggestion><match no="1" regexp_match="(?)id" regexp_replace="ID" /></suggestion>
+                <suggestion><match no="1" regexp_match="id" regexp_replace="ID" /></suggestion>
                 <example correction="ID">My <marker>id</marker> proves that I'm over 18 years old.</example>
                 <example>Parameter #0: [id:0, scaledConfigurationValue:0, size:1]</example>
                 <example>.id is the Internet country code top-level domain for Indonesia.</example>
@@ -110972,7 +110972,7 @@ The accident victim died from her injuries.
             <rule>
                 <regexp case_sensitive='yes'>(?U)(?&lt;![A-Z\$€£¥฿฿=]-?[0-9\.]{0,5})((\b|\-)[0-9]{1,5}[0-9,.]{0,5}(€|¥|฿|฿|°C|°F|°De?|°R[éeøa]?|(Z|E|P|T|G|M|k|h|da|d|c|m|µ|n|f|z|y)[ΩΩm]|[ΩΩ]|(Z|E|P|T|G|M|k|h|da|d|c|m|µ|n|p|f|a|z|y)?N|[kKMGTPEZY]i?B|[kmµnp]g|[Mk]t|kWh|GWa|MWd|MWh)(?!\w))</regexp>
                 <message>Insert a space between the numerical value and the unit symbol.</message>
-                <suggestion><match no="1" regexp_match="((\-)?[0-9]+[0-9,.]*{1,30})" regexp_replace="$1&nbsp;"/></suggestion>
+                <suggestion><match no="1" regexp_match="((\-)?[0-9]+[0-9,.]*)" regexp_replace="$1&nbsp;"/></suggestion>
                 <example correction="25&nbsp;°C">The temperature is <marker>25°C</marker>.</example>
                 <example correction="-25&nbsp;°C">The temperature is <marker>-25°C</marker>.</example>
                 <example correction="25,5&nbsp;°F">The temperature is <marker>25,5°F</marker> warm.</example>
@@ -118210,7 +118210,7 @@ The accident victim died from her injuries.
                     <token regexp='yes'>i|we|they|s?he</token>
                     <marker><token regexp="yes">lifes?</token></marker>
                 </pattern>
-                <message>Did you mean the verb <suggestion><match no="2" regexp_match="(?)ife" regexp_replace="ive" /></suggestion>?</message>
+                <message>Did you mean the verb <suggestion><match no="2" regexp_match="ife" regexp_replace="ive" /></suggestion>?</message>
                 <example correction="live">I <marker>life</marker> in Moscow.</example>
                 <example correction="live">We have to respect the laws of the land we <marker>life</marker> in.</example>
                 <example>Troopers are trained to use Type I life jackets on handcuffed subjects.</example>

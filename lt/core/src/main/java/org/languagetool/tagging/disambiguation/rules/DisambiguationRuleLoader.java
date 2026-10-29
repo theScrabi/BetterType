@@ -18,6 +18,8 @@
  */
 package org.languagetool.tagging.disambiguation.rules;
 
+import org.languagetool.RuleEntityResolver;
+import org.languagetool.tools.StringTools;
 import org.languagetool.JLanguageTool;
 import org.languagetool.Language;
 import org.languagetool.tools.Tools;
@@ -44,16 +46,18 @@ public class DisambiguationRuleLoader extends DefaultHandler {
     DisambiguationRuleHandler handler = new DisambiguationRuleHandler(language, xmlPath);
     SAXParserFactory factory = SAXParserFactory.newInstance();
     SAXParser saxParser = factory.newSAXParser();
-    saxParser.getXMLReader().setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
-    saxParser.getXMLReader().setProperty("jdk.xml.maxGeneralEntitySizeLimit", 0);
-    saxParser.getXMLReader().setProperty("jdk.xml.totalEntitySizeLimit", 0);
-    saxParser.getXMLReader().setProperty("jdk.xml.entityExpansionLimit", 0);
+    if (!StringTools.IS_ANDROID) {  // Android's expat parser rejects these Xerces/JDK settings
+      saxParser.getXMLReader().setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+      saxParser.getXMLReader().setProperty("jdk.xml.maxGeneralEntitySizeLimit", 0);
+      saxParser.getXMLReader().setProperty("jdk.xml.totalEntitySizeLimit", 0);
+      saxParser.getXMLReader().setProperty("jdk.xml.entityExpansionLimit", 0);
+    }
 
     if (JLanguageTool.isCustomPasswordAuthenticatorUsed()) {
       Tools.setPasswordAuthenticator();
     }
 
-    saxParser.parse(stream, handler);
+    saxParser.parse(RuleEntityResolver.inlineEntityFilesOnAndroid(stream), handler);
     return handler.getDisambRules();
   }
 

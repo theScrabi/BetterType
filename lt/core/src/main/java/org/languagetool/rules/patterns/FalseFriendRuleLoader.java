@@ -18,6 +18,7 @@
  */
 package org.languagetool.rules.patterns;
 
+import org.languagetool.tools.StringTools;
 import org.languagetool.JLanguageTool;
 import org.languagetool.Language;
 import org.languagetool.ShortDescriptionProvider;
@@ -77,9 +78,11 @@ public class FalseFriendRuleLoader extends DefaultHandler {
         textLanguage, motherTongue, falseFriendHint, inTestMode);
     SAXParserFactory factory = SAXParserFactory.newInstance();
     SAXParser saxParser = factory.newSAXParser();
-    saxParser.getXMLReader().setFeature(
-            "http://apache.org/xml/features/nonvalidating/load-external-dtd",
-            false);
+    if (!StringTools.IS_ANDROID) {  // Android's expat parser rejects these Xerces/JDK settings
+      saxParser.getXMLReader().setFeature(
+              "http://apache.org/xml/features/nonvalidating/load-external-dtd",
+              false);
+    }
     saxParser.parse(stream, handler);
     List<AbstractPatternRule> rules = handler.getRules();
     List<AbstractPatternRule> filteredRules = new ArrayList<>();

@@ -24,6 +24,7 @@ import net.loomchild.segment.srx.SrxParser;
 import net.loomchild.segment.srx.SrxTextIterator;
 import net.loomchild.segment.srx.io.Srx2SaxParser;
 import org.languagetool.JLanguageTool;
+import org.languagetool.tools.StringTools;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -31,6 +32,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Tools for loading an SRX tokenizer file.
@@ -48,9 +50,11 @@ final class SrxTools {
         BufferedReader srxReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))
       ) {
         Map<String, Object> parserParameters = new HashMap<>();
-        parserParameters.put(Srx2SaxParser.VALIDATE_PARAMETER, true);
+        // Android has no XML Schema validator; the JVM build still validates the bundled SRX files.
+        parserParameters.put(Srx2SaxParser.VALIDATE_PARAMETER, !StringTools.IS_ANDROID);
         SrxParser srxParser = new Srx2SaxParser(parserParameters);
-        return srxParser.parse(srxReader);
+        String srx = StringTools.withoutUnicodeFlagOnAndroid(srxReader.lines().collect(Collectors.joining("\n")));
+        return srxParser.parse(new StringReader(srx));
       }
     } catch (IOException e) {
       throw new RuntimeException("Could not load SRX rules", e);

@@ -76458,7 +76458,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA
             <rule>
                 <regexp case_sensitive='yes'>(?&lt;![A-Z])((\b|\-)[0-9]+[0-9,.]{0,15}(%|€|\$|¥|°C|°F|°De?|°R[éeøa]?|(Z|E|P|T|G|M|k|h|da|d|c|m|µ|n|p|f|a|z|y)?[ΩΩm]|(Z|E|P|T|G|M|k|h|da|d|c|m|µ|n|p|f|a|z|y)?N|[kKMGTPEZY]i?B|Stk|[kmµnp]?g|[Mk]t|kWh|GWa|MWd|MWh)(?![\w\-]))</regexp>
                 <message>Vor Einheitenzeichen sollte ein Leerzeichen gesetzt werden.</message>
-                <suggestion><match no="1" regexp_match="((\-)?[0-9]+[0-9,.]*{1,30})" regexp_replace="$1 "/></suggestion>
+                <suggestion><match no="1" regexp_match="((\-)?[0-9]+[0-9,.]*)" regexp_replace="$1 "/></suggestion>
                 <url>https://languagetool.org/insights/de/beitrag/leerzeichen-masseinheiten/</url>
                 <example correction="25 °C">Es ist <marker>25°C</marker> warm.</example>
                 <example correction="-25 °C">Es ist <marker>-25°C</marker> warm.</example>
