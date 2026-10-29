@@ -1,8 +1,12 @@
 package org.schabi.bettertype
 
+import org.languagetool.JLanguageTool
 import org.languagetool.Language
 import org.languagetool.Languages
+import org.languagetool.ResultCache
 import org.languagetool.rules.spelling.hunspell.AndroidHunspellDictionary
+import java.util.Locale
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * LanguageTool normally finds languages via META-INF/org/languagetool/language-module.properties,
@@ -34,5 +38,18 @@ object LtLanguages {
         System.setProperty("org.xml.sax.driver", "org.apache.harmony.xml.ExpatReader")
         AndroidHunspellDictionary.install()
         CLASSES.map(Languages::getOrAddLanguageByClassName)
+    }
+
+    private val checkers = ConcurrentHashMap<Language, JLanguageTool>()
+
+    /**
+     * One checker per language for the whole process: creating one loads rules and dictionaries (seconds).
+     * [JLanguageTool] isn't thread-safe, so callers synchronize on the returned instance.
+     */
+    fun checkerFor(locale: Locale): JLanguageTool {
+        all
+        return checkers.computeIfAbsent(Languages.getLanguageForLocale(locale)) {
+            JLanguageTool(it, null, ResultCache(1000))
+        }
     }
 }

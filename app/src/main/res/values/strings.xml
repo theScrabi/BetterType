@@ -1,3 +1,5 @@
 <resources>
-    <string name="app_name">BetterType</string>
+    <string name="app_name">Better Type</string>
+    <!-- %s is replaced by the system with the language name -->
+    <string name="subtype_label">%s</string>
 </resources>

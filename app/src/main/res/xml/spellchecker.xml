@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<spell-checker xmlns:android="http://schemas.android.com/apk/res/android"
+    android:label="@string/app_name"
+    android:settingsActivity="org.schabi.bettertype.MainActivity">
+    <subtype android:label="@string/subtype_label" android:languageTag="en-US" android:subtypeLocale="en_US" />
+    <subtype android:label="@string/subtype_label" android:languageTag="en-GB" android:subtypeLocale="en_GB" />
+    <subtype android:label="@string/subtype_label" android:languageTag="de-DE" android:subtypeLocale="de_DE" />
+    <subtype android:label="@string/subtype_label" android:languageTag="de-AT" android:subtypeLocale="de_AT" />
+    <subtype android:label="@string/subtype_label" android:languageTag="de-CH" android:subtypeLocale="de_CH" />
+    <subtype android:label="@string/subtype_label" android:languageTag="fr-FR" android:subtypeLocale="fr_FR" />
+    <subtype android:label="@string/subtype_label" android:languageTag="es-ES" android:subtypeLocale="es_ES" />
+</spell-checker>
