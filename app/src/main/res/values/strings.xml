@@ -3,7 +3,8 @@
     <!-- %s is replaced by the system with the language name -->
     <string name="subtype_label">%s</string>
     <string name="keep_alive_channel">Spell checker running</string>
-    <string name="keep_alive_text">Spell checker ready</string>
+    <string name="keep_alive_text">Spell checker running</string>
+    <string name="loading_channel">Loading languages</string>
     <string name="loading_language">Loading %1$s…</string>
     <string name="loading_language_percent">Loading %1$s… %2$d %%</string>
 </resources>

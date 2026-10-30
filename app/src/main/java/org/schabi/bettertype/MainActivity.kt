@@ -121,7 +121,7 @@ private fun LanguageSwitches() {
                 checked = code in enabled,
                 onCheckedChange = { on ->
                     enabled = if (on) enabled + code else enabled - code
-                    LtLanguages.setEnabled(context, enabled)
+                    KeepAliveService.applyLanguages(context, enabled)
                 },
             )
             Text(LANGUAGE_NAMES.getValue(code))

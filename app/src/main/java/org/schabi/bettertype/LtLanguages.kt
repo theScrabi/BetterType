@@ -66,14 +66,23 @@ object LtLanguages {
     private fun systemLocales(context: Context): List<Locale> =
         context.resources.configuration.locales.let { locales -> List(locales.size()) { locales[it] } }
 
-    /** Only English until the user picks languages. */
-    fun enabled(context: Context): Set<String> = settings(context).getStringSet("enabled_languages", null) ?: setOf("en")
+    // SharedPreferences don't sync between processes, so the engine process reads the setting once when it starts
+    // and is told about changes by KeepAliveService.applyLanguages.
+    @Volatile private var enabledNow: Set<String>? = null
 
+    /** Only English until the user picks languages. */
+    fun enabled(context: Context): Set<String> = enabledNow
+        ?: (settings(context).getStringSet("enabled_languages", null) ?: setOf("en")).also { enabledNow = it }
+
+    /** Stores the choice; called in the process that shows the settings. */
+    fun saveEnabled(context: Context, codes: Set<String>) {
+        settings(context).edit().putStringSet("enabled_languages", codes).commit()
+        enabledNow = codes
+    }
+
+    /** Called in the engine process. Only ever adds languages: removing one restarts the process. */
     fun setEnabled(context: Context, codes: Set<String>) {
-        settings(context).edit().putStringSet("enabled_languages", codes).apply()
-        // Dropping a checker frees its memory once running checks are done with it.
-        checkers.keys.removeIf { it.shortCode !in codes }
-        warmed.removeIf { it.shortCode !in codes }
+        enabledNow = codes
         warmUpEnabled(context)
     }
 
@@ -123,8 +132,7 @@ object LtLanguages {
             try {
                 all
                 val language = Languages.getLanguageForLocale(locale)
-                // The language may have been switched off while this waited in the queue.
-                if (language.shortCode !in enabled(context) || !warmed.add(language)) return@execute
+                if (!warmed.add(language)) return@execute
                 val start = SystemClock.elapsedRealtime()
                 current = language to start
                 onLoadingChanged?.invoke()
