@@ -1,5 +1,6 @@
 package org.schabi.bettertype
 
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.os.Bundle
 import android.provider.Settings
@@ -44,8 +45,8 @@ class MainActivity : ComponentActivity() {
                                 "running entirely on your device. To turn it on, open Settings → System → " +
                                 "Keyboard → Spell checker and choose Better Type.",
                         )
-                        Button(onClick = { startActivity(Intent(Settings.ACTION_INPUT_METHOD_SETTINGS)) }) {
-                            Text("Open keyboard settings")
+                        Button(onClick = ::openSpellCheckerSettings) {
+                            Text("Open spell checker settings")
                         }
                         // A framework EditText, because the system spell checker reliably attaches to it.
                         val textColor = MaterialTheme.colorScheme.onSurface.toArgb()
@@ -65,6 +66,16 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }
+        }
+    }
+
+    // There is no public intent for System → Keyboard → Spell checker. AOSP exports this activity;
+    // Settings apps without it get the general keyboard settings instead.
+    private fun openSpellCheckerSettings() {
+        try {
+            startActivity(Intent().setClassName("com.android.settings", "com.android.settings.Settings\$SpellCheckersSettingsActivity"))
+        } catch (_: ActivityNotFoundException) {
+            startActivity(Intent(Settings.ACTION_INPUT_METHOD_SETTINGS))
         }
     }
 }
