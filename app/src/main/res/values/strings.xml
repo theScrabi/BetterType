@@ -2,4 +2,6 @@
     <string name="app_name">Better Type</string>
     <!-- %s is replaced by the system with the language name -->
     <string name="subtype_label">%s</string>
+    <string name="keep_alive_channel">Spell checker running</string>
+    <string name="keep_alive_text">Spell checker ready</string>
 </resources>

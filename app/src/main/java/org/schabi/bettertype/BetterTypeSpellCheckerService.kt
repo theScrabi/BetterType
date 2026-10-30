@@ -15,6 +15,7 @@ class BetterTypeSpellCheckerService : SpellCheckerService() {
 
     override fun onCreate() {
         super.onCreate()
+        KeepAliveService.start(this)
         val locales = resources.configuration.locales
         for (i in 0 until locales.size()) LtLanguages.warmUp(locales[i])
     }
