@@ -59,16 +59,15 @@ object LtLanguages {
     }
 
     /** The languages the user can switch on and off, as LanguageTool short codes. */
-    val SUPPORTED = listOf("de", "en", "fr", "es")
+    val SUPPORTED = listOf("en", "de", "fr", "es")
 
     private fun settings(context: Context) = context.applicationContext.getSharedPreferences("settings", Context.MODE_PRIVATE)
 
     private fun systemLocales(context: Context): List<Locale> =
         context.resources.configuration.locales.let { locales -> List(locales.size()) { locales[it] } }
 
-    /** Defaults to the system languages Better Type supports, or English if there are none. */
-    fun enabled(context: Context): Set<String> = settings(context).getStringSet("enabled_languages", null)
-        ?: systemLocales(context).map { it.language }.filter { it in SUPPORTED }.toSet().ifEmpty { setOf("en") }
+    /** Only English until the user picks languages. */
+    fun enabled(context: Context): Set<String> = settings(context).getStringSet("enabled_languages", null) ?: setOf("en")
 
     fun setEnabled(context: Context, codes: Set<String>) {
         settings(context).edit().putStringSet("enabled_languages", codes).apply()
