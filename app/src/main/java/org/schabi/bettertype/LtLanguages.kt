@@ -1,5 +1,8 @@
 package org.schabi.bettertype
 
+import android.content.Context
+import android.content.SharedPreferences
+import android.os.SystemClock
 import android.util.Log
 import org.languagetool.JLanguageTool
 import org.languagetool.Language
@@ -59,18 +62,52 @@ object LtLanguages {
         Thread(task, "lt-warm-up").apply { isDaemon = true; priority = Thread.MIN_PRIORITY }
     }
 
+    private val warmed = ConcurrentHashMap.newKeySet<Language>()
+    private lateinit var loadTimes: SharedPreferences
+
+    /** The language being loaded and when that started; only the warm-up thread writes it. */
+    @Volatile private var current: Pair<Language, Long>? = null
+
+    /** Called on the warm-up thread whenever a language starts or finishes loading. */
+    @Volatile var onLoadingChanged: (() -> Unit)? = null
+
+    /** [percent] is null on a language's very first load, when there is no earlier load time to compare with. */
+    class Loading(val language: Language, val percent: Int?)
+
+    /**
+     * There is no way to see how far LanguageTool got, so this is the time since the load started compared with how
+     * long the last load of the same language took, capped at 99 % until it is done.
+     */
+    fun loading(): Loading? {
+        val (language, start) = current ?: return null
+        val expected = loadTimes.getLong(language.shortCodeWithCountryAndVariant, 0)
+        val percent = if (expected > 0) ((SystemClock.elapsedRealtime() - start) * 100 / expected).coerceAtMost(99).toInt() else null
+        return Loading(language, percent)
+    }
+
     /**
      * Loads the language in the background and runs one check: LanguageTool initializes much of its data
      * lazily on the first check (German: ~30 s on an emulator), which would otherwise delay the first result.
      */
-    fun warmUp(locale: Locale) {
+    fun warmUp(context: Context, locale: Locale) {
+        loadTimes = context.applicationContext.getSharedPreferences("load_times", Context.MODE_PRIVATE)
         warmUpExecutor.execute {
             try {
+                all
+                val language = Languages.getLanguageForLocale(locale)
+                if (!warmed.add(language)) return@execute
+                val start = SystemClock.elapsedRealtime()
+                current = language to start
+                onLoadingChanged?.invoke()
                 val lt = checkerFor(locale)
                 // The made-up word also initializes suggestion generation, which only happens for the first typo.
                 synchronized(lt) { lt.check("Warm-up qxzv.") }
+                loadTimes.edit().putLong(language.shortCodeWithCountryAndVariant, SystemClock.elapsedRealtime() - start).apply()
             } catch (e: Exception) {
                 Log.e("BetterType", "Warm-up for $locale failed", e)
+            } finally {
+                current = null
+                onLoadingChanged?.invoke()
             }
         }
     }
