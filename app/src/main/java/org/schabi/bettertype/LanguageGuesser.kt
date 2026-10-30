@@ -23,14 +23,16 @@ object LanguageGuesser {
     }
 
     /**
-     * Returns [preferred] unless another of the [candidates] knows more of the text's words. At least two words
-     * must speak for the other language, so a single shared or borrowed word ("ok", "Haus") never switches it.
+     * Returns [preferred] unless another of the [candidates] knows more of the text's words. In longer texts at
+     * least two words must speak for the other language, so one borrowed word doesn't switch it. A one-word text
+     * ("Dear", the first word while typing) switches on that word alone, else it would be checked as a misspelled
+     * word of the preferred language. Words common to both ("ok") keep the preferred language.
      */
     fun guess(text: String, candidates: Set<String>, preferred: String): String {
         val words = WORD.findAll(text.replace('’', '\'')).map { it.value.lowercase() }.toList()
         val scores = candidates.associateWith { code -> words.count { it in commonWords(code) } }
         val best = scores.maxBy { it.value }
         val preferredScore = scores[preferred] ?: 0
-        return if (best.key != preferred && best.value > preferredScore && best.value >= 2) best.key else preferred
+        return if (best.key != preferred && best.value > preferredScore && best.value >= minOf(2, words.size)) best.key else preferred
     }
 }

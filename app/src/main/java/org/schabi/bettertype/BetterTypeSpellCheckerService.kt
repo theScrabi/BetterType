@@ -34,19 +34,18 @@ private class BetterTypeSession(private val context: Context) : SpellCheckerServ
     override fun onCreate() {}
 
     /** Null when every language is switched off. Loading a language takes seconds, so never call this from onCreate. */
-    private fun checkerFor(text: String?): JLanguageTool? {
+    private fun checkerFor(text: String): JLanguageTool? {
         val enabled = LtLanguages.enabled(context)
         if (enabled.isEmpty()) return null
         val preferred = requested.language.takeIf { it in enabled } ?: enabled.first()
-        val code = if (text == null) preferred else LanguageGuesser.guess(text, enabled, preferred)
+        val code = LanguageGuesser.guess(text, enabled, preferred)
         return LtLanguages.checkerFor(if (code == requested.language) requested else LtLanguages.localeFor(context, code))
     }
 
-    // A single word says too little about its language, so words are always checked in the preferred one.
     override fun onGetSuggestions(textInfo: TextInfo, suggestionsLimit: Int): SuggestionsInfo {
         val word = textInfo.text
         val match = if (word.isBlank()) null else safely(null) {
-            val lt = checkerFor(null) ?: return@safely null
+            val lt = checkerFor(word) ?: return@safely null
             val speller = lt.allActiveRules.firstOrNull { it.isDictionaryBasedSpellingRule } as? SpellingCheckRule
             synchronized(lt) { speller?.match(lt.getAnalyzedSentence(word))?.firstOrNull() }
         }

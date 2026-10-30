@@ -18,6 +18,8 @@ class LanguageGuesserTest {
         assertEquals("fr", guess("C'est une maison."))
         assertEquals("es", guess("Es una casa bonita."))
         assertEquals("de", guess("Ich habe einen Auto gekauft.", preferred = "en"))
+        // The first word while typing "Dear ladies and gentleman".
+        assertEquals("en", guess("Dear"))
     }
 
     @Test fun keepsPreferredWhenUnclear() {
