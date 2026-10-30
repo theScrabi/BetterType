@@ -13,16 +13,25 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -56,6 +65,7 @@ class MainActivity : ComponentActivity() {
                         Button(onClick = ::openSpellCheckerSettings) {
                             Text("Open spell checker settings")
                         }
+                        LanguageSwitches()
                         // A framework EditText, because the system spell checker reliably attaches to it.
                         val textColor = MaterialTheme.colorScheme.onSurface.toArgb()
                         val hintColor = MaterialTheme.colorScheme.onSurfaceVariant.toArgb()
@@ -84,6 +94,32 @@ class MainActivity : ComponentActivity() {
             startActivity(Intent().setClassName("com.android.settings", "com.android.settings.Settings\$SpellCheckersSettingsActivity"))
         } catch (_: ActivityNotFoundException) {
             startActivity(Intent(Settings.ACTION_INPUT_METHOD_SETTINGS))
+        }
+    }
+}
+
+private val LANGUAGE_NAMES = mapOf("de" to "German", "en" to "English", "fr" to "French", "es" to "Spanish")
+
+@Composable
+private fun LanguageSwitches() {
+    val context = LocalContext.current
+    var enabled by remember { mutableStateOf(LtLanguages.enabled(context)) }
+    Text("Languages", style = MaterialTheme.typography.titleMedium)
+    Text(
+        "Texts are checked in the text field's language. If a text is clearly written in another of the " +
+            "languages switched on here, it is checked in that one. Every language stays loaded and takes " +
+            "50–270 MB of memory (German the most).",
+    )
+    for (code in LtLanguages.SUPPORTED) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Checkbox(
+                checked = code in enabled,
+                onCheckedChange = { on ->
+                    enabled = if (on) enabled + code else enabled - code
+                    LtLanguages.setEnabled(context, enabled)
+                },
+            )
+            Text(LANGUAGE_NAMES.getValue(code))
         }
     }
 }

@@ -54,8 +54,7 @@ class KeepAliveService : Service() {
             NotificationChannel(CHANNEL, getString(R.string.keep_alive_channel), NotificationManager.IMPORTANCE_MIN),
         )
         startForeground(ID, notification(LtLanguages.loading()), ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE)
-        val locales = resources.configuration.locales
-        for (i in 0 until locales.size()) LtLanguages.warmUp(this, locales[i])
+        LtLanguages.warmUpEnabled(this)
         return START_STICKY
     }
 

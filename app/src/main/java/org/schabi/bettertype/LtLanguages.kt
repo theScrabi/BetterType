@@ -58,6 +58,35 @@ object LtLanguages {
         }
     }
 
+    /** The languages the user can switch on and off, as LanguageTool short codes. */
+    val SUPPORTED = listOf("de", "en", "fr", "es")
+
+    private fun settings(context: Context) = context.applicationContext.getSharedPreferences("settings", Context.MODE_PRIVATE)
+
+    private fun systemLocales(context: Context): List<Locale> =
+        context.resources.configuration.locales.let { locales -> List(locales.size()) { locales[it] } }
+
+    /** Defaults to the system languages Better Type supports, or English if there are none. */
+    fun enabled(context: Context): Set<String> = settings(context).getStringSet("enabled_languages", null)
+        ?: systemLocales(context).map { it.language }.filter { it in SUPPORTED }.toSet().ifEmpty { setOf("en") }
+
+    fun setEnabled(context: Context, codes: Set<String>) {
+        settings(context).edit().putStringSet("enabled_languages", codes).apply()
+        // Dropping a checker frees its memory once running checks are done with it.
+        checkers.keys.removeIf { it.shortCode !in codes }
+        warmed.removeIf { it.shortCode !in codes }
+        warmUpEnabled(context)
+    }
+
+    /** The variant from the system languages (en-GB for a British user), else LanguageTool's default variant. */
+    fun localeFor(context: Context, code: String): Locale =
+        systemLocales(context).firstOrNull { it.language == code } ?: Locale.forLanguageTag(code)
+
+    /** All enabled languages stay loaded, because a text may switch to any of them (see [LanguageGuesser]). */
+    fun warmUpEnabled(context: Context) {
+        for (code in enabled(context)) warmUp(context, localeFor(context, code))
+    }
+
     private val warmUpExecutor = Executors.newSingleThreadExecutor { task ->
         Thread(task, "lt-warm-up").apply { isDaemon = true; priority = Thread.MIN_PRIORITY }
     }
@@ -95,7 +124,8 @@ object LtLanguages {
             try {
                 all
                 val language = Languages.getLanguageForLocale(locale)
-                if (!warmed.add(language)) return@execute
+                // The language may have been switched off while this waited in the queue.
+                if (language.shortCode !in enabled(context) || !warmed.add(language)) return@execute
                 val start = SystemClock.elapsedRealtime()
                 current = language to start
                 onLoadingChanged?.invoke()

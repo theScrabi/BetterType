@@ -1,5 +1,6 @@
 package org.schabi.bettertype
 
+import android.content.Context
 import android.service.textservice.SpellCheckerService
 import android.util.Log
 import android.view.textservice.SentenceSuggestionsInfo
@@ -16,29 +17,37 @@ class BetterTypeSpellCheckerService : SpellCheckerService() {
     override fun onCreate() {
         super.onCreate()
         KeepAliveService.start(this)
-        val locales = resources.configuration.locales
-        for (i in 0 until locales.size()) LtLanguages.warmUp(this, locales[i])
+        LtLanguages.warmUpEnabled(this)
     }
 
-    override fun createSession(): Session = BetterTypeSession()
+    override fun createSession(): Session = BetterTypeSession(this)
 }
 
-private class BetterTypeSession : SpellCheckerService.Session() {
+private class BetterTypeSession(private val context: Context) : SpellCheckerService.Session() {
 
-    // Created on first use (a binder thread), not in onCreate, because loading a language takes seconds.
-    private val lt: JLanguageTool by lazy {
+    // The language the text field asked for; texts written in another enabled language are checked in that one.
+    private val requested: Locale by lazy {
         @Suppress("DEPRECATION") val tag = locale
-        LtLanguages.checkerFor(if (tag.isNullOrEmpty()) Locale.getDefault() else Locale.forLanguageTag(tag.replace('_', '-')))
-    }
-    private val speller: SpellingCheckRule? by lazy {
-        lt.allActiveRules.firstOrNull { it.isDictionaryBasedSpellingRule } as? SpellingCheckRule
+        if (tag.isNullOrEmpty()) Locale.getDefault() else Locale.forLanguageTag(tag.replace('_', '-'))
     }
 
     override fun onCreate() {}
 
+    /** Null when every language is switched off. Loading a language takes seconds, so never call this from onCreate. */
+    private fun checkerFor(text: String?): JLanguageTool? {
+        val enabled = LtLanguages.enabled(context)
+        if (enabled.isEmpty()) return null
+        val preferred = requested.language.takeIf { it in enabled } ?: enabled.first()
+        val code = if (text == null) preferred else LanguageGuesser.guess(text, enabled, preferred)
+        return LtLanguages.checkerFor(if (code == requested.language) requested else LtLanguages.localeFor(context, code))
+    }
+
+    // A single word says too little about its language, so words are always checked in the preferred one.
     override fun onGetSuggestions(textInfo: TextInfo, suggestionsLimit: Int): SuggestionsInfo {
         val word = textInfo.text
         val match = if (word.isBlank()) null else safely(null) {
+            val lt = checkerFor(null) ?: return@safely null
+            val speller = lt.allActiveRules.firstOrNull { it.isDictionaryBasedSpellingRule } as? SpellingCheckRule
             synchronized(lt) { speller?.match(lt.getAnalyzedSentence(word))?.firstOrNull() }
         }
         return if (match == null) {
@@ -52,7 +61,10 @@ private class BetterTypeSession : SpellCheckerService.Session() {
         textInfos: Array<TextInfo>,
         suggestionsLimit: Int,
     ): Array<SentenceSuggestionsInfo> = textInfos.map { textInfo ->
-        val matches = safely(emptyList()) { synchronized(lt) { lt.check(textInfo.text) } }
+        val matches = safely(emptyList()) {
+            val lt = checkerFor(textInfo.text) ?: return@safely emptyList()
+            synchronized(lt) { lt.check(textInfo.text) }
+        }
         SentenceSuggestionsInfo(
             matches.map { match ->
                 val kind = if (match.rule.isDictionaryBasedSpellingRule) SuggestionsInfo.RESULT_ATTR_LOOKS_LIKE_TYPO
