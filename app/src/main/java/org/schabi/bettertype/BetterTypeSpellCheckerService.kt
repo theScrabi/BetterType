@@ -17,6 +17,7 @@ class BetterTypeSpellCheckerService : SpellCheckerService() {
     override fun onCreate() {
         super.onCreate()
         KeepAliveService.start(this)
+        StartingNotification.attach(this)
         LtLanguages.warmUpEnabled(this)
     }
 
