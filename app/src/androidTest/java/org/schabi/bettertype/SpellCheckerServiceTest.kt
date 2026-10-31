@@ -1,5 +1,7 @@
 package org.schabi.bettertype
 
+import android.content.ContentValues
+import android.provider.UserDictionary
 import android.view.textservice.SentenceSuggestionsInfo
 import android.view.textservice.SpellCheckerSession
 import android.view.textservice.SpellCheckerSession.SpellCheckerSessionListener
@@ -92,5 +94,30 @@ class SpellCheckerServiceTest {
         assertTrue(good.suggestionsAttributes and SuggestionsInfo.RESULT_ATTR_IN_THE_DICTIONARY != 0)
         assertTrue(bad.suggestionsAttributes and SuggestionsInfo.RESULT_ATTR_LOOKS_LIKE_TYPO != 0)
         assertTrue((0 until bad.suggestionsCount).map { bad.getSuggestionAt(it) }.contains("house"))
+    }
+
+    @Test
+    fun personalDictionaryWordsAreNotTypos() {
+        val word = "Qwzblorf"
+        // Only the selected spell checker and keyboards may use the user dictionary; the test runs as Better Type.
+        val resolver = instrumentation.targetContext.contentResolver
+        resolver.insert(UserDictionary.Words.CONTENT_URI, ContentValues().apply {
+            put(UserDictionary.Words.WORD, word)
+            put(UserDictionary.Words.FREQUENCY, 250)
+        })
+        try {
+            val text = "I like $word a lot."
+            session.getSentenceSuggestions(arrayOf(TextInfo(text)), 5)
+            val info = sentenceResults.poll(120, TimeUnit.SECONDS)!!.single()
+            val flagged = (0 until info.suggestionsCount).map { text.substring(info.getOffsetAt(it), info.getOffsetAt(it) + info.getLengthAt(it)) }
+            assertTrue(flagged.toString(), word !in flagged)
+
+            @Suppress("DEPRECATION")
+            session.getSuggestions(arrayOf(TextInfo(word)), 5, false)
+            val result = wordResults.poll(60, TimeUnit.SECONDS)!!.single()
+            assertTrue(result.suggestionsAttributes and SuggestionsInfo.RESULT_ATTR_IN_THE_DICTIONARY != 0)
+        } finally {
+            resolver.delete(UserDictionary.Words.CONTENT_URI, "${UserDictionary.Words.WORD}=?", arrayOf(word))
+        }
     }
 }

@@ -45,7 +45,7 @@ private class BetterTypeSession(private val context: Context) : SpellCheckerServ
 
     override fun onGetSuggestions(textInfo: TextInfo, suggestionsLimit: Int): SuggestionsInfo {
         val word = textInfo.text
-        val match = if (word.isBlank()) null else safely(null) {
+        val match = if (word.isBlank() || PersonalDictionary.contains(context, word)) null else safely(null) {
             val lt = checkerFor(word) ?: return@safely null
             val speller = lt.allActiveRules.firstOrNull { it.isDictionaryBasedSpellingRule } as? SpellingCheckRule
             synchronized(lt) { speller?.match(lt.getAnalyzedSentence(word))?.firstOrNull() }
@@ -63,7 +63,10 @@ private class BetterTypeSession(private val context: Context) : SpellCheckerServ
     ): Array<SentenceSuggestionsInfo> = textInfos.map { textInfo ->
         val matches = safely(emptyList()) {
             val lt = checkerFor(textInfo.text) ?: return@safely emptyList()
-            synchronized(lt) { lt.check(textInfo.text) }
+            synchronized(lt) { lt.check(textInfo.text) }.filterNot { match ->
+                match.rule.isDictionaryBasedSpellingRule &&
+                    PersonalDictionary.contains(context, textInfo.text.substring(match.fromPos, match.toPos))
+            }
         }
         SentenceSuggestionsInfo(
             matches.map { match ->
