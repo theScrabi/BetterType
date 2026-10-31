@@ -1,5 +1,6 @@
 *.iml
-/.idea/
+/.idea/*
+!/.idea/icon.png
 .gradle
 /local.properties
 .DS_Store
