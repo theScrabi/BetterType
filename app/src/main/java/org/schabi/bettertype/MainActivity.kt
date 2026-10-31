@@ -7,41 +7,62 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
-import android.widget.EditText
+import android.text.InputType
+import android.view.Gravity
+import android.view.textservice.TextServicesManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.Checkbox
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import com.google.android.material.color.DynamicColors
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
+import org.schabi.bettertype.ui.Preference
+import org.schabi.bettertype.ui.PreferenceCategory
+import org.schabi.bettertype.ui.PreferenceFooter
+import org.schabi.bettertype.ui.PreferenceGroup
+import org.schabi.bettertype.ui.SwitchPreference
 import org.schabi.bettertype.ui.theme.BetterTypeTheme
 
 class MainActivity : ComponentActivity() {
+    private var spellCheckerSelected by mutableStateOf(false)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Material You colors for the view-based text field; Compose gets them from BetterTypeTheme.
+        DynamicColors.applyToActivityIfAvailable(this)
         enableEdgeToEdge()
         KeepAliveService.start(this)
         // The keep-alive notification shows how far the languages have loaded.
@@ -50,46 +71,16 @@ class MainActivity : ComponentActivity() {
         }
         setContent {
             BetterTypeTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Column(
-                        modifier = Modifier
-                            .padding(innerPadding)
-                            // Edge-to-edge apps no longer get resized for the keyboard, so make room for it here.
-                            .consumeWindowInsets(innerPadding)
-                            .imePadding()
-                            .padding(16.dp)
-                            .verticalScroll(rememberScrollState()),
-                        verticalArrangement = Arrangement.spacedBy(16.dp),
-                    ) {
-                        Text("Better Type", style = MaterialTheme.typography.headlineMedium)
-                        Text(
-                            "Grammar and spell checking for every text field, powered by LanguageTool and " +
-                                "running entirely on your device. To turn it on, open Settings → System → " +
-                                "Keyboard → Spell checker and choose Better Type.",
-                        )
-                        Button(onClick = ::openSpellCheckerSettings) {
-                            Text("Open spell checker settings")
-                        }
-                        LanguageSwitches()
-                        // A framework EditText, because the system spell checker reliably attaches to it.
-                        val textColor = MaterialTheme.colorScheme.onSurface.toArgb()
-                        val hintColor = MaterialTheme.colorScheme.onSurfaceVariant.toArgb()
-                        AndroidView(
-                            factory = {
-                                EditText(it).apply {
-                                    hint = "Type here to try it, e.g. \"This are a test.\""
-                                    setTextColor(textColor)
-                                    setHintTextColor(hintColor)
-                                }
-                            },
-                            modifier = Modifier.fillMaxWidth(),
-                        )
-                        Text("Licenses", style = MaterialTheme.typography.titleMedium)
-                        Text(LICENSES, style = MaterialTheme.typography.bodySmall)
-                    }
-                }
+                SettingsScreen(spellCheckerSelected, ::openSpellCheckerSettings)
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // The user may come back from the system settings.
+        val tsm = getSystemService(TextServicesManager::class.java)
+        spellCheckerSelected = tsm.isSpellCheckerEnabled && tsm.currentSpellCheckerInfo?.packageName == packageName
     }
 
     // There is no public intent for System → Keyboard → Spell checker. AOSP exports this activity;
@@ -103,30 +94,133 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SettingsScreen(spellCheckerSelected: Boolean, openSpellCheckerSettings: () -> Unit) {
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    val background = MaterialTheme.colorScheme.surfaceContainer
+    var showLicenses by remember { mutableStateOf(false) }
+    Scaffold(
+        modifier = Modifier.fillMaxSize().nestedScroll(scrollBehavior.nestedScrollConnection),
+        containerColor = background,
+        topBar = {
+            LargeTopAppBar(
+                title = { Text("Better Type") },
+                scrollBehavior = scrollBehavior,
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = background, scrolledContainerColor = background),
+            )
+        },
+    ) { innerPadding ->
+        Column(
+            Modifier
+                .padding(innerPadding)
+                // Edge-to-edge apps no longer get resized for the keyboard, so make room for it here.
+                .consumeWindowInsets(innerPadding)
+                .imePadding()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp),
+        ) {
+            if (spellCheckerSelected) {
+                PreferenceGroup(listOf {
+                    Preference(
+                        "Spell checker",
+                        "Better Type checks what you type in other apps",
+                        onClick = openSpellCheckerSettings,
+                    )
+                })
+            } else {
+                SetupCard(openSpellCheckerSettings)
+            }
+
+            PreferenceCategory("Try it")
+            PreferenceGroup(listOf { TryItField() })
+
+            PreferenceCategory("Languages")
+            LanguageSwitches()
+            PreferenceFooter(
+                "Texts are checked in the text field's language. If a text is clearly written in another of the " +
+                    "languages switched on here, it is checked in that one. Every language stays loaded and takes " +
+                    "50–270 MB of memory (German the most).",
+            )
+
+            PreferenceCategory("About")
+            val context = LocalContext.current
+            PreferenceGroup(listOf(
+                { Preference("Version", context.packageManager.getPackageInfo(context.packageName, 0).versionName) },
+                { Preference("Open-source licenses", "LanguageTool, Hunspell and more", onClick = { showLicenses = true }) },
+            ))
+            Spacer(Modifier.navigationBarsPadding().height(24.dp))
+        }
+    }
+    if (showLicenses) {
+        AlertDialog(
+            onDismissRequest = { showLicenses = false },
+            confirmButton = { TextButton(onClick = { showLicenses = false }) { Text("Close") } },
+            title = { Text("Open-source licenses") },
+            text = { Text(LICENSES, Modifier.verticalScroll(rememberScrollState())) },
+        )
+    }
+}
+
+@Composable
+private fun SetupCard(openSpellCheckerSettings: () -> Unit) {
+    Card(
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+        ),
+    ) {
+        Column(Modifier.padding(20.dp)) {
+            Text("Turn on Better Type", style = MaterialTheme.typography.titleMedium)
+            Text(
+                "Grammar and spell checking for every text field, running entirely on your device. " +
+                    "Choose Better Type under System → Keyboard → Spell checker.",
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(top = 4.dp, bottom = 16.dp),
+            )
+            Button(onClick = openSpellCheckerSettings) { Text("Open spell checker settings") }
+        }
+    }
+}
+
+/** A framework EditText (in a Material text field), because the system spell checker reliably attaches to it. */
+@Composable
+private fun TryItField() {
+    AndroidView(
+        factory = { context ->
+            TextInputLayout(context, null, com.google.android.material.R.attr.textInputOutlinedStyle).apply {
+                hint = "Type something"
+                placeholderText = "e.g. \"This are a test.\""
+                addView(TextInputEditText(this.context).apply {
+                    inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE or InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
+                    minLines = 4
+                    gravity = Gravity.TOP or Gravity.START
+                })
+            }
+        },
+        modifier = Modifier.fillMaxWidth().padding(16.dp),
+    )
+}
+
 private val LANGUAGE_NAMES = mapOf("de" to "German", "en" to "English", "fr" to "French", "es" to "Spanish")
 
 @Composable
 private fun LanguageSwitches() {
     val context = LocalContext.current
     var enabled by remember { mutableStateOf(LtLanguages.enabled(context)) }
-    Text("Languages", style = MaterialTheme.typography.titleMedium)
-    Text(
-        "Texts are checked in the text field's language. If a text is clearly written in another of the " +
-            "languages switched on here, it is checked in that one. Every language stays loaded and takes " +
-            "50–270 MB of memory (German the most).",
-    )
-    for (code in LtLanguages.SUPPORTED) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Checkbox(
+    PreferenceGroup(LtLanguages.SUPPORTED.map { code ->
+        {
+            SwitchPreference(
+                LANGUAGE_NAMES.getValue(code),
                 checked = code in enabled,
                 onCheckedChange = { on ->
                     enabled = if (on) enabled + code else enabled - code
                     KeepAliveService.applyLanguages(context, enabled)
                 },
             )
-            Text(LANGUAGE_NAMES.getValue(code))
         }
-    }
+    })
 }
 
 private const val LICENSES = """Better Type is free software under the GNU General Public License v3.0 or later.
