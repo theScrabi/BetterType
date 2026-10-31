@@ -1,0 +1,25 @@
+<resources>
+    <string name="keep_alive_channel">Rechtschreibprüfung aktiv</string>
+    <string name="keep_alive_text">Rechtschreibprüfung aktiv</string>
+    <string name="loading_channel">Sprachen werden gestartet</string>
+    <string name="loading_language">%1$s wird gestartet…</string>
+    <string name="loading_language_percent">%1$s wird gestartet… %2$d %%</string>
+
+    <string name="spell_checker">Rechtschreibprüfung</string>
+    <string name="spell_checker_summary">Better Type prüft, was du in anderen Apps schreibst</string>
+    <string name="setup_title">Better Type einschalten</string>
+    <string name="setup_text">Grammatik- und Rechtschreibprüfung für jedes Textfeld, komplett auf deinem Gerät. Wähle Better Type unter System → Tastatur → Rechtschreibprüfung.</string>
+    <string name="setup_button">Rechtschreibprüfung öffnen</string>
+    <string name="try_it">Ausprobieren</string>
+    <string name="try_it_hint">Schreib etwas</string>
+    <string name="try_it_placeholder">z. B. „Das sind ein Test.“</string>
+    <string name="languages">Sprachen</string>
+    <string name="languages_footer">Texte werden in der Sprache des Textfelds geprüft. Ist ein Text eindeutig in einer anderen der hier eingeschalteten Sprachen geschrieben, wird er in dieser geprüft. Jede Sprache bleibt geladen und belegt 50–270 MB Arbeitsspeicher (Deutsch am meisten).</string>
+    <string name="about">Über</string>
+    <string name="version">Version</string>
+    <string name="licenses">Open-Source-Lizenzen</string>
+    <string name="licenses_summary">LanguageTool, Hunspell und mehr</string>
+    <string name="licenses_intro">Better Type ist freie Software unter der GNU General Public License v3.0 oder neuer.\n\nEnthalten sind:</string>
+    <string name="licenses_outro">Quellcode und vollständige Lizenztexte: siehe LICENSE und NOTICE.md im Quellcode-Repository.</string>
+    <string name="close">Schließen</string>
+</resources>

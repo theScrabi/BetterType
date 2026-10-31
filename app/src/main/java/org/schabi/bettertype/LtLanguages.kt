@@ -58,6 +58,9 @@ object LtLanguages {
         }
     }
 
+    /** A language's name in the user's language, e.g. "Deutsch (Österreich)" for de-AT on a German phone. */
+    fun displayName(locale: Locale): String = locale.displayName.replaceFirstChar { it.titlecase(Locale.getDefault()) }
+
     /** The languages the user can switch on and off, as LanguageTool short codes. */
     val SUPPORTED = listOf("en", "de", "fr", "es")
 

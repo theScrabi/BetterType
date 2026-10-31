@@ -1,10 +1,28 @@
 <resources>
-    <string name="app_name">Better Type</string>
+    <string name="app_name" translatable="false">Better Type</string>
     <!-- %s is replaced by the system with the language name -->
-    <string name="subtype_label">%s</string>
+    <string name="subtype_label" translatable="false">%s</string>
     <string name="keep_alive_channel">Spell checker running</string>
     <string name="keep_alive_text">Spell checker running</string>
     <string name="loading_channel">Starting languages</string>
     <string name="loading_language">Starting %1$s…</string>
     <string name="loading_language_percent">Starting %1$s… %2$d %%</string>
+
+    <string name="spell_checker">Spell checker</string>
+    <string name="spell_checker_summary">Better Type checks what you type in other apps</string>
+    <string name="setup_title">Turn on Better Type</string>
+    <string name="setup_text">Grammar and spell checking for every text field, running entirely on your device. Choose Better Type under System → Keyboard → Spell checker.</string>
+    <string name="setup_button">Open spell checker settings</string>
+    <string name="try_it">Try it</string>
+    <string name="try_it_hint">Type something</string>
+    <string name="try_it_placeholder">e.g. \"This are a test.\"</string>
+    <string name="languages">Languages</string>
+    <string name="languages_footer">Texts are checked in the text field\'s language. If a text is clearly written in another of the languages switched on here, it is checked in that one. Every language stays loaded and takes 50–270 MB of memory (German the most).</string>
+    <string name="about">About</string>
+    <string name="version">Version</string>
+    <string name="licenses">Open-source licenses</string>
+    <string name="licenses_summary">LanguageTool, Hunspell and more</string>
+    <string name="licenses_intro">Better Type is free software under the GNU General Public License v3.0 or later.\n\nIt contains:</string>
+    <string name="licenses_outro">Source code and full license texts: see LICENSE and NOTICE.md in the source repository.</string>
+    <string name="close">Close</string>
 </resources>

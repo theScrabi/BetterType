@@ -1,0 +1,25 @@
+<resources>
+    <string name="keep_alive_channel">Correcteur orthographique actif</string>
+    <string name="keep_alive_text">Correcteur orthographique actif</string>
+    <string name="loading_channel">Démarrage des langues</string>
+    <string name="loading_language">Démarrage : %1$s…</string>
+    <string name="loading_language_percent">Démarrage : %1$s… %2$d %%</string>
+
+    <string name="spell_checker">Correcteur orthographique</string>
+    <string name="spell_checker_summary">Better Type vérifie ce que vous écrivez dans les autres applis</string>
+    <string name="setup_title">Activer Better Type</string>
+    <string name="setup_text">Correction grammaticale et orthographique dans tous les champs de texte, entièrement sur votre appareil. Choisissez Better Type sous Système → Clavier → Correcteur orthographique.</string>
+    <string name="setup_button">Ouvrir les paramètres du correcteur</string>
+    <string name="try_it">Essayer</string>
+    <string name="try_it_hint">Écrivez quelque chose</string>
+    <string name="try_it_placeholder">p. ex. « Ceci sont un test. »</string>
+    <string name="languages">Langues</string>
+    <string name="languages_footer">Les textes sont vérifiés dans la langue du champ de texte. Si un texte est clairement écrit dans une autre des langues activées ici, il est vérifié dans celle-ci. Chaque langue reste chargée et occupe 50 à 270 Mo de mémoire (l\'allemand le plus).</string>
+    <string name="about">À propos</string>
+    <string name="version">Version</string>
+    <string name="licenses">Licences open source</string>
+    <string name="licenses_summary">LanguageTool, Hunspell et plus</string>
+    <string name="licenses_intro">Better Type est un logiciel libre sous licence GNU General Public License v3.0 ou ultérieure.\n\nIl contient :</string>
+    <string name="licenses_outro">Code source et textes complets des licences : voir LICENSE et NOTICE.md dans le dépôt source.</string>
+    <string name="close">Fermer</string>
+</resources>

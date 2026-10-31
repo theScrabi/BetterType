@@ -58,10 +58,10 @@ object StartingNotification {
             .setOnlyAlertOnce(true)
             .setOngoing(true)
         if (loading.percent == null) {
-            builder.setContentTitle(context.getString(R.string.loading_language, loading.language.name))
+            builder.setContentTitle(context.getString(R.string.loading_language, LtLanguages.displayName(loading.language.locale)))
                 .setProgress(0, 0, true)
         } else {
-            builder.setContentTitle(context.getString(R.string.loading_language_percent, loading.language.name, loading.percent))
+            builder.setContentTitle(context.getString(R.string.loading_language_percent, LtLanguages.displayName(loading.language.locale), loading.percent))
                 .setProgress(100, loading.percent, false)
         }
         return builder.build()

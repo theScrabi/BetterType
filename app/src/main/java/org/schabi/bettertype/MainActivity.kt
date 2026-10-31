@@ -44,11 +44,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.google.android.material.color.DynamicColors
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
+import java.util.Locale
 import org.schabi.bettertype.ui.Preference
 import org.schabi.bettertype.ui.PreferenceCategory
 import org.schabi.bettertype.ui.PreferenceFooter
@@ -105,7 +107,7 @@ private fun SettingsScreen(spellCheckerSelected: Boolean, openSpellCheckerSettin
         containerColor = background,
         topBar = {
             LargeTopAppBar(
-                title = { Text("Better Type") },
+                title = { Text(stringResource(R.string.app_name)) },
                 scrollBehavior = scrollBehavior,
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = background, scrolledContainerColor = background),
             )
@@ -123,8 +125,8 @@ private fun SettingsScreen(spellCheckerSelected: Boolean, openSpellCheckerSettin
             if (spellCheckerSelected) {
                 PreferenceGroup(listOf {
                     Preference(
-                        "Spell checker",
-                        "Better Type checks what you type in other apps",
+                        stringResource(R.string.spell_checker),
+                        stringResource(R.string.spell_checker_summary),
                         onClick = openSpellCheckerSettings,
                     )
                 })
@@ -132,22 +134,18 @@ private fun SettingsScreen(spellCheckerSelected: Boolean, openSpellCheckerSettin
                 SetupCard(openSpellCheckerSettings)
             }
 
-            PreferenceCategory("Try it")
+            PreferenceCategory(stringResource(R.string.try_it))
             PreferenceGroup(listOf { TryItField() })
 
-            PreferenceCategory("Languages")
+            PreferenceCategory(stringResource(R.string.languages))
             LanguageSwitches()
-            PreferenceFooter(
-                "Texts are checked in the text field's language. If a text is clearly written in another of the " +
-                    "languages switched on here, it is checked in that one. Every language stays loaded and takes " +
-                    "50–270 MB of memory (German the most).",
-            )
+            PreferenceFooter(stringResource(R.string.languages_footer))
 
-            PreferenceCategory("About")
+            PreferenceCategory(stringResource(R.string.about))
             val context = LocalContext.current
             PreferenceGroup(listOf(
-                { Preference("Version", context.packageManager.getPackageInfo(context.packageName, 0).versionName) },
-                { Preference("Open-source licenses", "LanguageTool, Hunspell and more", onClick = { showLicenses = true }) },
+                { Preference(stringResource(R.string.version), context.packageManager.getPackageInfo(context.packageName, 0).versionName) },
+                { Preference(stringResource(R.string.licenses), stringResource(R.string.licenses_summary), onClick = { showLicenses = true }) },
             ))
             Spacer(Modifier.navigationBarsPadding().height(24.dp))
         }
@@ -155,9 +153,12 @@ private fun SettingsScreen(spellCheckerSelected: Boolean, openSpellCheckerSettin
     if (showLicenses) {
         AlertDialog(
             onDismissRequest = { showLicenses = false },
-            confirmButton = { TextButton(onClick = { showLicenses = false }) { Text("Close") } },
-            title = { Text("Open-source licenses") },
-            text = { Text(LICENSES, Modifier.verticalScroll(rememberScrollState())) },
+            confirmButton = { TextButton(onClick = { showLicenses = false }) { Text(stringResource(R.string.close)) } },
+            title = { Text(stringResource(R.string.licenses)) },
+            text = {
+                val licenses = stringResource(R.string.licenses_intro) + LICENSES + stringResource(R.string.licenses_outro)
+                Text(licenses, Modifier.verticalScroll(rememberScrollState()))
+            },
         )
     }
 }
@@ -172,14 +173,13 @@ private fun SetupCard(openSpellCheckerSettings: () -> Unit) {
         ),
     ) {
         Column(Modifier.padding(20.dp)) {
-            Text("Turn on Better Type", style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.setup_title), style = MaterialTheme.typography.titleMedium)
             Text(
-                "Grammar and spell checking for every text field, running entirely on your device. " +
-                    "Choose Better Type under System → Keyboard → Spell checker.",
+                stringResource(R.string.setup_text),
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.padding(top = 4.dp, bottom = 16.dp),
             )
-            Button(onClick = openSpellCheckerSettings) { Text("Open spell checker settings") }
+            Button(onClick = openSpellCheckerSettings) { Text(stringResource(R.string.setup_button)) }
         }
     }
 }
@@ -190,8 +190,8 @@ private fun TryItField() {
     AndroidView(
         factory = { context ->
             TextInputLayout(context, null, com.google.android.material.R.attr.textInputOutlinedStyle).apply {
-                hint = "Type something"
-                placeholderText = "e.g. \"This are a test.\""
+                hint = context.getString(R.string.try_it_hint)
+                placeholderText = context.getString(R.string.try_it_placeholder)
                 addView(TextInputEditText(this.context).apply {
                     inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE or InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
                     minLines = 4
@@ -203,8 +203,6 @@ private fun TryItField() {
     )
 }
 
-private val LANGUAGE_NAMES = mapOf("de" to "German", "en" to "English", "fr" to "French", "es" to "Spanish")
-
 @Composable
 private fun LanguageSwitches() {
     val context = LocalContext.current
@@ -212,7 +210,7 @@ private fun LanguageSwitches() {
     PreferenceGroup(LtLanguages.SUPPORTED.map { code ->
         {
             SwitchPreference(
-                LANGUAGE_NAMES.getValue(code),
+                LtLanguages.displayName(Locale.forLanguageTag(code)),
                 checked = code in enabled,
                 onCheckedChange = { on ->
                     enabled = if (on) enabled + code else enabled - code
@@ -223,9 +221,8 @@ private fun LanguageSwitches() {
     })
 }
 
-private const val LICENSES = """Better Type is free software under the GNU General Public License v3.0 or later.
-
-It contains:
+// Names of the components and licenses, the same in every language.
+private const val LICENSES = """
 • LanguageTool 6.8 (languagetool.org), LGPL 2.1 or later
 • Hunspell 1.7.2, MPL 1.1 / GPL 2.0 / LGPL 2.1
 • Morfologik, BSD
@@ -234,4 +231,4 @@ It contains:
 • English and Spanish POS dictionaries, LGPL 2.1
 • Apache OpenNLP and its English models, Apache License 2.0
 
-Source code and full license texts: see LICENSE and NOTICE.md in the source repository."""
+"""
