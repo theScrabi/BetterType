@@ -61,16 +61,18 @@ private class BetterTypeSession(private val context: Context) : SpellCheckerServ
         textInfos: Array<TextInfo>,
         suggestionsLimit: Int,
     ): Array<SentenceSuggestionsInfo> = textInfos.map { textInfo ->
+        var spellers = emptySet<String>()
         val matches = safely(emptyList()) {
             val lt = checkerFor(textInfo.text) ?: return@safely emptyList()
+            // Matches from the result cache carry a stand-in rule that always says it isn't a speller, so go by rule ID.
+            spellers = lt.allActiveRules.filter { it.isDictionaryBasedSpellingRule }.mapTo(HashSet()) { it.id }
             synchronized(lt) { lt.check(textInfo.text) }.filterNot { match ->
-                match.rule.isDictionaryBasedSpellingRule &&
-                    PersonalDictionary.contains(context, textInfo.text.substring(match.fromPos, match.toPos))
+                PersonalDictionary.contains(context, textInfo.text.substring(match.fromPos, match.toPos))
             }
         }
         SentenceSuggestionsInfo(
             matches.map { match ->
-                val kind = if (match.rule.isDictionaryBasedSpellingRule) SuggestionsInfo.RESULT_ATTR_LOOKS_LIKE_TYPO
+                val kind = if (match.rule.id in spellers) SuggestionsInfo.RESULT_ATTR_LOOKS_LIKE_TYPO
                 else SuggestionsInfo.RESULT_ATTR_LOOKS_LIKE_GRAMMAR_ERROR
                 suggestionsInfo(match, kind, suggestionsLimit, textInfo)
             }.toTypedArray(),

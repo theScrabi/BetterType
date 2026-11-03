@@ -70,8 +70,11 @@ class SpellCheckerServiceTest {
     @Test
     fun sentenceGetsGrammarAndTypoSpans() {
         val text = "This are a tset."
-        session.getSentenceSuggestions(arrayOf(TextInfo(text)), 5)
-        val info = sentenceResults.poll(120, TimeUnit.SECONDS)!!.single()
+        // The second check is served from LanguageTool's result cache, whose matches lose their rule's speller flag.
+        val info = List(2) {
+            session.getSentenceSuggestions(arrayOf(TextInfo(text)), 5)
+            sentenceResults.poll(120, TimeUnit.SECONDS)!!.single()
+        }.last()
 
         val spans = (0 until info.suggestionsCount).map { i ->
             Triple(text.substring(info.getOffsetAt(i), info.getOffsetAt(i) + info.getLengthAt(i)),
@@ -106,11 +109,13 @@ class SpellCheckerServiceTest {
             put(UserDictionary.Words.FREQUENCY, 250)
         })
         try {
-            val text = "I like $word a lot."
-            session.getSentenceSuggestions(arrayOf(TextInfo(text)), 5)
-            val info = sentenceResults.poll(120, TimeUnit.SECONDS)!!.single()
-            val flagged = (0 until info.suggestionsCount).map { text.substring(info.getOffsetAt(it), info.getOffsetAt(it) + info.getLengthAt(it)) }
-            assertTrue(flagged.toString(), word !in flagged)
+            // Twice, as the second check is served from LanguageTool's result cache.
+            for (text in listOf("I like $word a lot.", "$word. Then more.", "$word. Then more.")) {
+                session.getSentenceSuggestions(arrayOf(TextInfo(text)), 5)
+                val info = sentenceResults.poll(120, TimeUnit.SECONDS)!!.single()
+                val flagged = (0 until info.suggestionsCount).map { text.substring(info.getOffsetAt(it), info.getOffsetAt(it) + info.getLengthAt(it)) }
+                assertTrue(flagged.toString(), word !in flagged)
+            }
 
             @Suppress("DEPRECATION")
             session.getSuggestions(arrayOf(TextInfo(word)), 5, false)
