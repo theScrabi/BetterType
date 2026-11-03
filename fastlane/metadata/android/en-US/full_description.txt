@@ -1,0 +1,14 @@
+Better Type is an Android system spell checker that runs <a href="https://languagetool.org">LanguageTool</a> entirely on your device. It checks spelling and grammar in every text field, with no server and no network access.
+
+<b>Features</b>
+<ul>
+<li>Spelling and grammar checking through Android's spell checker service, so it works in any app</li>
+<li>Runs fully offline, nothing leaves your device</li>
+<li>English, German, French and Spanish</li>
+<li>Choose which languages to load; the language of your text is detected automatically</li>
+<li>Keeps loaded languages in memory for fast checks</li>
+<li>Words added to your personal dictionary are accepted</li>
+</ul>
+
+<b>Setup</b>
+Install the app, then go to Settings → System → Keyboard → Spell checker and choose Better Type.
