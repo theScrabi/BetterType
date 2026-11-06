@@ -1,0 +1,14 @@
+Better Type ist eine Android-Rechtschreibprüfung, die <a href="https://languagetool.org">LanguageTool</a> vollständig auf deinem Gerät ausführt. Sie prüft Rechtschreibung und Grammatik in jedem Textfeld – ohne Server und ohne Netzwerkzugriff.
+
+<b>Funktionen</b>
+<ul>
+<li>Rechtschreib- und Grammatikprüfung über Androids Rechtschreibprüfungsdienst, daher funktioniert sie in jeder App</li>
+<li>Läuft komplett offline, nichts verlässt dein Gerät</li>
+<li>Englisch, Deutsch, Französisch und Spanisch</li>
+<li>Wähle, welche Sprachen geladen werden; die Sprache deines Textes wird automatisch erkannt</li>
+<li>Geladene Sprachen bleiben im Speicher, für schnelle Prüfungen</li>
+<li>Wörter aus deinem persönlichen Wörterbuch werden akzeptiert</li>
+</ul>
+
+<b>Einrichtung</b>
+Installiere die App und wähle dann unter Einstellungen → System → Tastatur → Rechtschreibprüfung Better Type aus.

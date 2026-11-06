@@ -1,0 +1,14 @@
+Better Type es un corrector ortográfico del sistema para Android que ejecuta <a href="https://languagetool.org">LanguageTool</a> completamente en tu dispositivo. Revisa la ortografía y la gramática en cualquier campo de texto, sin servidor y sin acceso a la red.
+
+<b>Funciones</b>
+<ul>
+<li>Corrección ortográfica y gramatical a través del servicio de corrector ortográfico de Android, así que funciona en cualquier aplicación</li>
+<li>Funciona totalmente sin conexión, nada sale de tu dispositivo</li>
+<li>Inglés, alemán, francés y español</li>
+<li>Elige qué idiomas cargar; el idioma de tu texto se detecta automáticamente</li>
+<li>Los idiomas cargados se mantienen en memoria para revisiones rápidas</li>
+<li>Se aceptan las palabras de tu diccionario personal</li>
+</ul>
+
+<b>Configuración</b>
+Instala la aplicación, luego ve a Ajustes → Sistema → Teclado → Corrector ortográfico y elige Better Type.
