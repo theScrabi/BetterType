@@ -15,7 +15,7 @@ android {
         applicationId = "org.schabi.bettertype"
         minSdk = 31
         targetSdk = 37
-        versionCode = 1
+        versionCode = 100
         versionName = "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
