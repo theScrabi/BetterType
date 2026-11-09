@@ -5,6 +5,11 @@
 An Android system spell checker that runs [LanguageTool](https://languagetool.org) 6.8 entirely on your device.
 Grammar and spelling checks in every text field, no server, no network.
 
+<p align="center">
+  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/1.png" width="270" alt="Better Type settings">
+  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/2.png" width="270" alt="Better Type underlining spelling and grammar errors in a messaging app">
+</p>
+
 ## Features
 
 - Spelling and grammar checking via Android's spell checker service, so it works in any app
